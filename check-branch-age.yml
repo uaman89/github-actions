@@ -1,0 +1,23 @@
+name: Prevent old branches in pull requests
+run-name: Verifying that branch age is not older than max allowed days
+decription: Reinforcement of the short-lived branch strategy, hindering the merge if more than a certain maximum number of days have passed.
+
+env:
+    max-days: 3 # define the maximum allowed branch age in days
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Verifying branch age
+      id: branch-creation-date
+      shell: bash
+      run: |
+        branch_creation_date=$(git log --reverse --format=%aI $(git merge-base HEAD origin/main)..HEAD | head -n 1)
+        current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        branch_age=$(( ($(date -u -d $current_date +%s) - $(date -d $branch_creation_date +%s)) / 86400 ))
+
+        if [ "$branch_age" -gt "${{ env.max-days }}" ]; then
+          echo "Branch is too old: $branch_age days (maximum allowed is ${{ env.max-days }} days)"
+          exit 1
+        fi
+        echo "Branch age is acceptable: $branch_age days"
