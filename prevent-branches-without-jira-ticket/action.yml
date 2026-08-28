@@ -1,0 +1,21 @@
+name: Prevent branches without a Jira ticket
+run-name: Verifying that the branch name contains a Jira ticket
+description: Prevent pull requests from branches whose name does not contain an RE or REBNCRDMP Jira ticket key.
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Verify Jira ticket in branch name
+      id: verify-jira-ticket-in-branch-name
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      run: |
+        jira_ticket_pattern='(^|[^[:alnum:]])(RE|REBNCRDMP)-[0-9]+($|[^[:alnum:]])'
+
+        if [[ ! "$BRANCH_NAME" =~ $jira_ticket_pattern ]]; then
+          echo "Branch name '$BRANCH_NAME' must contain a Jira ticket such as RE-1234."
+          exit 1
+        fi
+
+        echo "Valid Jira ticket found in branch name '$BRANCH_NAME'."
