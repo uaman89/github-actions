@@ -3,7 +3,7 @@ run-name: Verifying that branch age is not older than max allowed days
 decription: Reinforcement of the short-lived branch strategy, hindering the merge if more than a certain maximum number of days have passed.
 
 env:
-    max-days: 3 # define the maximum allowed branch age in days
+    max-days: 2 # define the maximum allowed branch age in days
 
 runs:
   using: 'composite'
